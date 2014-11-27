@@ -143,14 +143,30 @@ class Library_Admin {
 	public function library_class_meta_box( $object, $box ) {
 		global $post;
 
-		$shortcode_example = '<code>[library term="' . $post->post_name . '"]</code>';
-		$php_example = '<code>&lt;?php echo do_shortcode( \'[library term="' . $post->post_name . '"]\' ) ?&gt;</code>';
-		echo '<p>';
-		printf( __( 'To display this inside your content use %s OR to use this inside of a template file use %s', 'library' ), $shortcode_example, $php_example );
-		echo '</p><p>';
-		_e( 'You can change the term slug by editing the permalink slug underneath the title.', 'library' );
-		echo '</p>';
+		$shortcode = '[library term="' . $post->post_name . '"]';
+		$shortcode_example = '<code>' . $shortcode . '</code>';
+		$php_example = '<code>&lt;?php echo do_shortcode( \'' . $shortcode . '\' ); ?&gt;</code>';
 
+		$post_types = get_post_types( array( 'show_ui' => true ), 'object' );
+		?>
+		<p>
+			<?php printf( __( 'To display this inside your content use %s OR to use this inside of a template file use %s', 'library' ), $shortcode_example, $php_example ); ?>
+		</p>
+		<p><?php _e( 'You can change the term slug by editing the permalink slug underneath the title.', 'library' ); ?></p>
+		<p>
+		<?php
+			_e( 'Find shortcode in these post types:', 'library' );
+			foreach ( $post_types as $post_type ) {
+				if ( ! in_array( $post_type->name, array( 'attachment', 'library_term' ) ) ) {
+					$query = build_query( array( 's' => urlencode( $shortcode ), 'post_type' => $post_type->name ) );
+				?>
+					<a href="<?php echo esc_url( admin_url( 'edit.php?' . $query ) ); ?>"><?php echo $post_type->labels->menu_name; ?></a>,&nbsp;
+				<?php
+				}
+			}
+		?>
+		</p>
+		<?php
 	}
 
 	/**
